@@ -38,13 +38,13 @@
   "commands": [
     {
       "name": "roam---daily-note",
-      "title": "Roam - Daily Note",
-      "description": "Creates a new note in Roam Research daily note",
+      "title": "Edit Daily Note",
+      "description": "Edit the content of your daily note",
       "mode": "view"
     },
     {
       "name": "roam---search",
-      "title": "Roam - Search",
+      "title": "Search Blocks",
       "description": "Search through Roam blocks",
       "mode": "view"
     }
