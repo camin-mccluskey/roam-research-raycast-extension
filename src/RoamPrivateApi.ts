@@ -15,6 +15,7 @@ class RoamPrivateApi {
 	db: string;
 	login: string;
 	pass: string;
+  loggingIn = false;
 
 	constructor( db: string, login: string, pass: string, options: RoamPrivateApiOptions = { headless: true, folder: '', nodownload: false } ) {
 		// If you dont pass folder option, we will use the system tmp directory.
@@ -26,6 +27,7 @@ class RoamPrivateApi {
 		this.login = login;
 		this.pass = pass;
 		this.options = options;
+    this.logIn();
 	}
 
   /**
@@ -43,8 +45,11 @@ class RoamPrivateApi {
 	 * @param {string} query - datalog query.
 	 */
 	async runQuery( query: string ) {
-    const { page } = await this.logIn();
-		return await page.evaluate( ( query: string ) => {
+    await this.logIn();
+    if (!this.page) {
+      throw new Error('No page found');
+    }
+		return await this.page.evaluate( ( query: string ) => {
 			if ( ! window.roamAlphaAPI ) {
 				return Promise.reject( 'No Roam API detected' );
 			}
@@ -60,8 +65,11 @@ class RoamPrivateApi {
 	 * @param {uid} uid - parent UID where block has to be inserted.
 	 */
 	async createBlock( text: string, uid: string ) {
-    const { page } = await this.logIn();
-		const result = await page.evaluate(
+    await this.logIn();
+    if (!this.page) {
+      throw new Error('No page found');
+    }
+		const result = await this.page.evaluate(
 			( text: string, uid: string ) => {
 				if ( ! window.roamAlphaAPI ) {
 					return Promise.reject( 'No Roam API detected' );
@@ -127,13 +135,20 @@ class RoamPrivateApi {
 	}
 
 	/**
-	 * Logs in to Roam interface. Returns browser and page objects.
+	 * Logs in to Roam interface
 	 */
-	async logIn(): Promise<{ browser: Browser, page: Page }> {
-		if ( this.browser && this.page ) {
-			return { browser: this.browser, page: this.page};
-		}    
-		this.browser = await launch( this.options );
+	async logIn() {
+    // already logged in
+    if (this.page && await this.page.evaluate(() => !!window.roamAlphaAPI)) return;
+    // waiting for login to finish
+    if (this.loggingIn) {
+      while (this.loggingIn) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      return;
+    }
+    this.loggingIn = true;
+		this.browser = await launch(this.options);
 		try {
 			this.page = await this.browser.newPage();
 			this.page.setDefaultTimeout( 60000 );
@@ -146,13 +161,14 @@ class RoamPrivateApi {
         else {
           req.continue();
         }
-    });
+      });
 
 			await this.page.goto( 'https://roamresearch.com/#/app/' + this.db,  { waitUntil: 'domcontentloaded' } );
 			await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
 			await this.page.waitForSelector( 'input[name=email]' );
 		} catch ( e ) {
 			console.error( 'Cannot load the login screen!' );
+      this.loggingIn = false;
 			throw e;
 		}
 		// Login
@@ -160,7 +176,7 @@ class RoamPrivateApi {
 		await this.page.type( 'input[name=password]', this.pass );
 		await this.page.click( '.bp3-button' );
 		await this.page.waitForSelector( '.bp3-icon-more' );
-		return {browser: this.browser, page: this.page};
+    this.loggingIn = false;
 	}
 }
 

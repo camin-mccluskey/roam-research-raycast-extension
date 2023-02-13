@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
-import RoamPrivateApi from './RoamPrivateApi';
 import { useEffect, useState } from "react";
+import RoamPrivateApi from './RoamPrivateApi';
 
 interface Preferences {
   email: string;
@@ -15,7 +15,6 @@ export default function Command() {
   const { email, password, graph } = getPreferenceValues<Preferences>(); 
   const { pop } = useNavigation();
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -53,13 +52,6 @@ export default function Command() {
         placeholder="Block Title"
         defaultValue={'Daily Note'}
         onChange={setTitle}
-      />
-      <Form.TextArea
-        title="Block Content"
-        id="content"
-        placeholder={"Text"}
-        defaultValue={''}
-        onChange={setContent}
       />
     </Form>
   )
