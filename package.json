@@ -37,21 +37,9 @@
   ],
   "commands": [
     {
-      "name": "roam---daily-note",
-      "title": "Test Daily Note",
-      "description": "Test the extension",
-      "mode": "view"
-    },
-    {
       "name": "roam---edit-daily-note",
       "title": "Edit Daily Note",
       "description": "Edit the content of your daily note",
-      "mode": "view"
-    },
-    {
-      "name": "roam---search",
-      "title": "Search Blocks",
-      "description": "Search through Roam blocks",
       "mode": "view"
     }
   ],
