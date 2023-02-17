@@ -15,9 +15,11 @@ class RoamPrivateApi {
 	db: string;
 	login: string;
 	pass: string;
+  initCallback: (roamPrivateApi: RoamPrivateApi) => void;
   loggingIn = false;
 
-	constructor( db: string, login: string, pass: string, options: RoamPrivateApiOptions = { headless: true, folder: '', nodownload: false } ) {
+	constructor( db: string, login: string, pass: string, initCallback: (roamPrivateApi: RoamPrivateApi) => void,
+  options: RoamPrivateApiOptions = { headless: true, folder: '', nodownload: false } ) {
 		// If you dont pass folder option, we will use the system tmp directory.
 		if (options.folder === '') {
 			options.folder = tmpdir();
@@ -27,6 +29,7 @@ class RoamPrivateApi {
 		this.login = login;
 		this.pass = pass;
 		this.options = options;
+    this.initCallback = initCallback;
     this.logIn();
 	}
 
@@ -151,7 +154,7 @@ class RoamPrivateApi {
 		this.browser = await launch(this.options);
 		try {
 			this.page = await this.browser.newPage();
-			this.page.setDefaultTimeout( 60000 );
+			this.page.setDefaultTimeout(60000);
       // disabled images, fonts and stylesheets
       await this.page.setRequestInterception(true);
       this.page.on('request', (req) => {
@@ -177,6 +180,7 @@ class RoamPrivateApi {
 		await this.page.click( '.bp3-button' );
 		await this.page.waitForSelector( '.bp3-icon-more' );
     this.loggingIn = false;
+    this.initCallback(this);
 	}
 }
 
