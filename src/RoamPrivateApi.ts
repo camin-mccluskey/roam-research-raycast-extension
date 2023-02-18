@@ -42,6 +42,27 @@ class RoamPrivateApi {
     await this.createBlock(text, dailyNoteUid);
   }
 
+  async getAllBlocksOnDailyNote() {
+    await this.logIn();
+    if (!this.page) {
+      throw new Error('No page found');
+    }
+    const pageTitle = this.dailyNoteTitle();
+    return await this.page.evaluate((pageTitle: string) => {
+      return window.roamAlphaAPI.q(`[ 
+        :find (pull ?e [ 
+          :node/title 
+          :block/string 
+          :block/children
+          {:block/children ...} 
+        ])
+        :in $ ?pageTitle
+        :where [?e :node/title ?pageTitle]]`,
+        pageTitle
+      )[0][0]
+    }, pageTitle);
+  }  
+
 	/**
 	 * Run a query on the new Roam Alpha API object.
 	 * More about the query syntax: https://www.zsolt.blog/2021/01/Roam-Data-Structure-Query.html
@@ -56,7 +77,7 @@ class RoamPrivateApi {
 			if ( ! window.roamAlphaAPI ) {
 				return Promise.reject( 'No Roam API detected' );
 			}
-			const result = window.roamAlphaAPI.q( query );
+			const result = window.roamAlphaAPI.q(query);
 			console.log( result );
 			return Promise.resolve( result );
 		}, query );
