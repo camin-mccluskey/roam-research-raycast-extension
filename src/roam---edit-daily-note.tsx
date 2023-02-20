@@ -1,53 +1,52 @@
 import { Action, ActionPanel, Form, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import RoamPrivateApi from './RoamPrivateApi';
+import RoamPrivateApi from "./RoamPrivateApi";
 
 type Preferences = {
   email: string;
   password: string;
   graph: string;
-}
+};
 
 // const cache = new Cache();
 
-
 export default function Command() {
-  const { email, password, graph } = getPreferenceValues<Preferences>(); 
+  const { email, password, graph } = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
   const [roamApi, setRoamApi] = useState<RoamPrivateApi | null>(null);
-  const [title, setTitle] = useState('loading...');
+  const [title, setTitle] = useState("loading...");
   const [isLoading, setIsLoading] = useState(false);
 
   const roamToMD = (input: string[][]): string => {
-    let res = '';
+    let res = "";
     input.forEach((block) => {
       res += `- ${block[0]}\n`;
     });
     return res;
-  }
+  };
 
   useEffect(() => {
     setIsLoading(true);
-    console.log('starting login')
+    console.log("starting login");
     const newRoamApi = new RoamPrivateApi(
-      graph, email, password,
-      (roamApi: RoamPrivateApi) => console.log('login finished'),
-      {headless: true, folder: '', nodownload: false}
+      graph,
+      email,
+      password,
+      (roamApi: RoamPrivateApi) => console.log("login finished"),
+      { headless: true, folder: "", nodownload: false }
     );
     setRoamApi(newRoamApi);
     newRoamApi.getAllBlocksOnDailyNote().then((res) => {
-      console.log(res)
+      console.log(res);
       setIsLoading(false);
       setTitle(roamToMD(res));
     });
   }, [email, password, graph]);
 
-  const onSubmit = () => {
-
-  }
+  const onSubmit = () => {};
 
   return (
-    <Form 
+    <Form
       isLoading={isLoading}
       enableDrafts
       actions={
@@ -66,7 +65,7 @@ export default function Command() {
         enableMarkdown
         value={title}
         onChange={(value) => setTitle(value)}
-        />
+      />
     </Form>
-  )
+  );
 }

@@ -1,12 +1,11 @@
 declare global {
   interface Window {
-    roamAlphaAPI?: any
+    roamAlphaAPI?: any;
   }
 }
 
 export type RoamPrivateApiOptions = {
-  headless: boolean,
-  folder: string,
-  nodownload: boolean,
-}
-
+  headless: boolean;
+  folder: string;
+  nodownload: boolean;
+};
